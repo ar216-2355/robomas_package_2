@@ -25,7 +25,7 @@ public:
         this->declare_parameter<std::vector<double>>("speed_gains_1", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("speed_gains_2", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("speed_gains_3", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_4", {2.0, 2.1, 2.2, 2.3, 2.4});
+        this->declare_parameter<std::vector<double>>("speed_gains_4", {20.0, 0.0, 0.0, 10000, 10000});
         this->declare_parameter<std::vector<double>>("speed_gains_5", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("speed_gains_6", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("speed_gains_7", {2.0, 2.1, 2.2, 2.3, 2.4});
@@ -34,7 +34,7 @@ public:
         this->declare_parameter<std::vector<double>>("position_gains_1", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("position_gains_2", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("position_gains_3", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_4", {2.0, 2.1, 2.2, 2.3, 2.4});
+        this->declare_parameter<std::vector<double>>("position_gains_4", {20, 0, 0, 1000, 10000});
         this->declare_parameter<std::vector<double>>("position_gains_5", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("position_gains_6", {2.0, 2.1, 2.2, 2.3, 2.4});
         this->declare_parameter<std::vector<double>>("position_gains_7", {2.0, 2.1, 2.2, 2.3, 2.4});
@@ -63,7 +63,8 @@ public:
             close(sock_);
             throw std::runtime_error("Bind failed");
         }
-    
+
+        send_canframe(0x002, 8, 0,0,0,0,0,0,0,0);
 
         target_sub_ = this->create_subscription<robomas_package_2::msg::MotorCmdArray>("motor_cmd_array", 10,
             std::bind(&SenderNode::target_callback, this, std::placeholders::_1));
@@ -71,6 +72,10 @@ public:
     }
 
     ~SenderNode() {
+        send_canframe(0x001, 8, 0,0,0,0,0,0,0,0);
+        for(uint8_t id=1; id<=8; id++){
+            send_canframe(0x100 + id, 8, 0,0,0,0,0,0,0,0);
+        }
         if (sock_ >= 0) {
             close(sock_);
         }
@@ -135,11 +140,11 @@ private:
         }
         if (gains.size() < 5) gains.resize(5, 0.0);
         uint8_t cmd[8];
-        uint16_t kp = static_cast<uint16_t>(gains[0] * 10);
-        uint16_t ki = static_cast<uint16_t>(gains[1] * 10);
-        uint16_t kd = static_cast<uint16_t>(gains[2] * 100);
+        uint16_t kp = static_cast<uint16_t>(gains[0] * 100);
+        uint16_t ki = static_cast<uint16_t>(gains[1] * 100);
+        uint16_t kd = static_cast<uint16_t>(gains[2] * 10000);
         uint8_t out_max = static_cast<uint8_t>(gains[3] * 0.01f);
-        uint8_t i_sum_max = static_cast<uint8_t>(gains[4] * 0.001f);
+        uint8_t i_sum_max = static_cast<uint8_t>(gains[4] * 0.01f);
         cmd[0] = (kp >> 8) & 0xFF;
         cmd[1] = kp & 0xFF;
         cmd[2] = (ki >> 8) & 0xFF;
@@ -182,7 +187,17 @@ private:
 int main(int argc, char * argv[])
 {
     rclcpp::init(argc, argv);
-    std::string ifname = (argc > 1) ? argv[1] : "can0";
+
+    // safe parse: pick first argv[i] that does NOT start with '-' as interface name
+    std::string ifname = "can0";
+    for (int i = 1; i < argc; ++i) {
+        std::string a(argv[i]);
+        if (a.empty()) continue;
+        if (a[0] == '-') continue;   // skip ros args and options like --ros-args / -p / -r
+        ifname = a;
+        break;
+    }
+
     auto node = std::make_shared<SenderNode>(ifname);
     rclcpp::spin(node);
     rclcpp::shutdown();

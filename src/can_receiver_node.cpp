@@ -51,6 +51,8 @@ int main(int argc, char * argv[])
 
 	struct can_frame frame;
 
+	long long unsigned int count = 0;
+
 	while (rclcpp::ok()) {
 		if (read(sock, &frame, sizeof(frame)) < 0) continue;
 
@@ -69,8 +71,12 @@ int main(int argc, char * argv[])
 
 			msg.motor_temperature = frame.data[6];
 
-			pub->publish(msg);
+			count++;
+			if(count % 10 == 0){
+				pub->publish(msg);
+			}
 		}
+		
 
 	}
 
