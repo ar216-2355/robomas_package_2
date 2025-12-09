@@ -1,6 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include "robomas_package_2/msg/motor_cmd.hpp"
 #include "robomas_package_2/msg/motor_cmd_array.hpp"
+#include "robomas_package_2/msg/can_frame.hpp"
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -22,23 +23,23 @@ public:
     SenderNode(const std::string& ifname = "can0") : Node("Sender_node"), ifname_(ifname) {
         
         // kp, kd, ki, out_max, i_sum_max
-        this->declare_parameter<std::vector<double>>("speed_gains_1", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_2", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_3", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_4", {20.0, 0.0, 0.0, 10000, 10000});
-        this->declare_parameter<std::vector<double>>("speed_gains_5", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_6", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_7", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("speed_gains_8", {2.0, 2.1, 2.2, 2.3, 2.4});
+        this->declare_parameter<std::vector<double>>("speed_gains_1", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_2", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_3", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_4", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_5", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_6", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_7", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_8", {17.0, 200.0, 0.05, 20000, 1000.0});
 
-        this->declare_parameter<std::vector<double>>("position_gains_1", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_2", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_3", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_4", {20, 0, 0, 1000, 10000});
-        this->declare_parameter<std::vector<double>>("position_gains_5", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_6", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_7", {2.0, 2.1, 2.2, 2.3, 2.4});
-        this->declare_parameter<std::vector<double>>("position_gains_8", {2.0, 2.1, 2.2, 2.3, 2.4});
+        this->declare_parameter<std::vector<double>>("position_gains_1", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_2", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_3", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_4", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_5", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_6", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_7", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_8", {600.0, 0.0, 0.5, 2000.0, 1000.0});
 
         sock_ = socket(PF_CAN, SOCK_RAW, CAN_RAW);
         if (sock_ < 0) {
@@ -69,6 +70,8 @@ public:
         target_sub_ = this->create_subscription<robomas_package_2::msg::MotorCmdArray>("motor_cmd_array", 10,
             std::bind(&SenderNode::target_callback, this, std::placeholders::_1));
         RCLCPP_INFO(this->get_logger(), "Subscribed to motor_tx topic");
+        can_sub_ = this->create_subscription<robomas_package_2::msg::CanFrame>("can_frame_tx", 10,
+            std::bind(&SenderNode::canframe_callback, this, std::placeholders::_1));
     }
 
     ~SenderNode() {
@@ -113,6 +116,12 @@ private:
             }
 
             M[id-1].value = c.value;
+            if(c.mode ==2){
+                M[id-1].value = c.value * 10;
+            }else{
+                M[id-1].value = c.value;
+            }
+
             if(1<=id && id<=4){
                 uint8_t cmd[8];
                 for(int i=0; i<4; i++) {
@@ -163,24 +172,26 @@ private:
         std::memset(&frame, 0, sizeof(frame));
         frame.can_id = id;
         frame.can_dlc = dlc;
-        frame.data[0] = d0;
-        frame.data[1] = d1;
-        frame.data[2] = d2;
-        frame.data[3] = d3;
-        frame.data[4] = d4;
-        frame.data[5] = d5;
-        frame.data[6] = d6;
-        frame.data[7] = d7;
+        uint8_t data[8] = {d0, d1, d2, d3, d4, d5, d6, d7};
+        for(int i = 0; i < dlc; i++){
+            frame.data[i] = data[i];
+        }
         int nbytes = write(sock_, &frame, sizeof(frame));
         if (nbytes != sizeof(frame)) {
             RCLCPP_ERROR(this->get_logger(), "Failed to send CAN frame");
         }
     }
     
+    void canframe_callback(const robomas_package_2::msg::CanFrame::SharedPtr msg) {
+        send_canframe(msg->id, msg->dlc,
+                      msg->data[0], msg->data[1], msg->data[2], msg->data[3],
+                      msg->data[4], msg->data[5], msg->data[6], msg->data[7]);
+    }
+
     std::string ifname_;
     int sock_{-1};
     rclcpp::Subscription<robomas_package_2::msg::MotorCmdArray>::SharedPtr target_sub_;
-
+    rclcpp::Subscription<robomas_package_2::msg::CanFrame>::SharedPtr can_sub_;
     MotorValue M[8];
 };
 

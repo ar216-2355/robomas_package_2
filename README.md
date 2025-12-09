@@ -8,4 +8,4 @@ cmds:
 - {id: 4, mode: 1, value: 0}
 "
 
-ros2 run robomas_package_2 sender can0 --ros-args -p speed_gains_4:='[100.0,0.0,0.0,10000.0,10000.0]'
+ros2 run robomas_package_2 sender can0

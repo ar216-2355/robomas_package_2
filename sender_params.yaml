@@ -1,0 +1,5 @@
+Sender_node:
+  ros__parameters:
+    speed_gains_1: [17.0, 200.0, 0.05, 20000, 1000.0]
+    speed_gains_2: [17.0, 200.0, 0.05, 20000, 1000.0]
+    position_gains_1: [600.0, 0.0, 0.5, 2000.0, 1000.0]
