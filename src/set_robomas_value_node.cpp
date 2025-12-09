@@ -149,8 +149,8 @@ private:
         }
         if (gains.size() < 5) gains.resize(5, 0.0);
         uint8_t cmd[8];
-        uint16_t kp = static_cast<uint16_t>(gains[0] * 100);
-        uint16_t ki = static_cast<uint16_t>(gains[1] * 100);
+        uint16_t kp = static_cast<uint16_t>(gains[0] * 10);
+        uint16_t ki = static_cast<uint16_t>(gains[1] * 10);
         uint16_t kd = static_cast<uint16_t>(gains[2] * 10000);
         uint8_t out_max = static_cast<uint8_t>(gains[3] * 0.01f);
         uint8_t i_sum_max = static_cast<uint8_t>(gains[4] * 0.01f);
@@ -198,18 +198,7 @@ private:
 int main(int argc, char * argv[])
 {
     rclcpp::init(argc, argv);
-
-    // safe parse: pick first argv[i] that does NOT start with '-' as interface name
-    std::string ifname = "can0";
-    for (int i = 1; i < argc; ++i) {
-        std::string a(argv[i]);
-        if (a.empty()) continue;
-        if (a[0] == '-') continue;   // skip ros args and options like --ros-args / -p / -r
-        ifname = a;
-        break;
-    }
-
-    auto node = std::make_shared<SenderNode>(ifname);
+    auto node = std::make_shared<SenderNode>("can0");
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
