@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MotorCmd.msg"
   "msg/MotorCmdArray.msg"
   "msg/CanFrame.msg"
+  "msg/Esc.msg"
 )
 
 add_executable(receiver src/can_receiver_node.cpp)
@@ -33,6 +34,8 @@ install(TARGETS
   sender
   DESTINATION lib/${PROJECT_NAME})
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(FILES sender_params.yaml DESTINATION share/${PROJECT_NAME})
 
 ament_export_dependencies(rosidl_default_runtime)
 ament_package()
