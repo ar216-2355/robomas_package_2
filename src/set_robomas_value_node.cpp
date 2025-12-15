@@ -35,14 +35,14 @@ public:
         this->declare_parameter<std::vector<double>>("speed_gains_7", {17.0, 200.0, 0.05, 20000, 1000.0});
         this->declare_parameter<std::vector<double>>("speed_gains_8", {17.0, 200.0, 0.05, 20000, 1000.0});
 
-        this->declare_parameter<std::vector<double>>("position_gains_1", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_2", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_3", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_4", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_5", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_6", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_7", {600.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_8", {600.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_2", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_3", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_4", {3000.0, 0.0, 0.5, 500.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_5", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_6", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_7", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_8", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
 
         sock_ = socket(PF_CAN, SOCK_RAW, CAN_RAW);
         if (sock_ < 0) {
