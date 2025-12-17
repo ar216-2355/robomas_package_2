@@ -17,13 +17,13 @@ def generate_launch_description():
         output='screen'
     )
 
-    receiver_node = Node(
-        package=pkg_name,
-        executable='receiver',
-        output='screen'
-    )
+    # receiver_node = Node(
+    #     package=pkg_name,
+    #     executable='receiver',
+    #     output='screen'
+    # )
 
     return LaunchDescription([
         sender_node,
-        receiver_node,
+        # receiver_node,
     ])
