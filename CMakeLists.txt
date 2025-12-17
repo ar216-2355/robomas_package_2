@@ -32,15 +32,16 @@ target_link_libraries(sender "${cpp_typesupport_target}")
 install(TARGETS
   receiver
   sender
-  DESTINATION lib/${PROJECT_NAME})
-
-install(
-  FILES sender_params.yaml
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
   DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
 
