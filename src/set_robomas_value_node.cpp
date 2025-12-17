@@ -26,19 +26,19 @@ public:
     SenderNode(const std::string& ifname = "can0") : Node("Sender_node"), ifname_(ifname) {
         
         // kp, kd, ki, out_max, i_sum_max
-        this->declare_parameter<std::vector<double>>("speed_gains_1", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_2", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_3", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_4", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_5", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_6", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_7", {17.0, 200.0, 0.05, 20000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_8", {17.0, 200.0, 0.05, 20000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_2", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_3", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_4", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_5", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_6", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_7", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_8", {17.0, 200.0, 0.05, 40000, 1000.0});
 
         this->declare_parameter<std::vector<double>>("position_gains_1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
         this->declare_parameter<std::vector<double>>("position_gains_2", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
         this->declare_parameter<std::vector<double>>("position_gains_3", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_4", {3000.0, 0.0, 0.5, 500.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_4", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
         this->declare_parameter<std::vector<double>>("position_gains_5", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
         this->declare_parameter<std::vector<double>>("position_gains_6", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
         this->declare_parameter<std::vector<double>>("position_gains_7", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
@@ -54,18 +54,18 @@ public:
         std::memset(&ifr, 0, sizeof(ifr));
         std::strncpy(ifr.ifr_name, ifname_.c_str(), IFNAMSIZ-1);
         if (ioctl(sock_, SIOCGIFINDEX, &ifr) < 0) {
-            RCLCPP_ERROR(this->get_logger(), "ioctl SIOCGIFINDEX failed");
-            close(sock_);
-            throw std::runtime_error("ioctl failed");
+            // RCLCPP_ERROR(this->get_logger(), "ioctl SIOCGIFINDEX failed");
+            // close(sock_);
+            // throw std::runtime_error("ioctl failed");
         }
         struct sockaddr_can addr;
         std::memset(&addr, 0, sizeof(addr));
         addr.can_family = AF_CAN;
         addr.can_ifindex = ifr.ifr_ifindex;
         if (bind(sock_, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-            RCLCPP_ERROR(this->get_logger(), "Failed to bind socket to interface %s", ifname_.c_str());
-            close(sock_);
-            throw std::runtime_error("Bind failed");
+            // RCLCPP_ERROR(this->get_logger(), "Failed to bind socket to interface %s", ifname_.c_str());
+            // close(sock_);
+            // throw std::runtime_error("Bind failed");
         }
 
         target_sub_ = this->create_subscription<robomas_package_2::msg::MotorCmdArray>("motor_cmd_array", 10,
@@ -218,62 +218,7 @@ private:
 
 int main(int argc, char * argv[])
 {
-    /////////////////////////////////////// sender_params.yaml 読み込み begin /////////////////////////////
-    // Get the installation directory of the package
-    std::string install_prefix;
-    const char* ament_prefix_path = std::getenv("AMENT_PREFIX_PATH");
-    if (ament_prefix_path) {
-        install_prefix = std::string(ament_prefix_path);
-        // AMENT_PREFIX_PATH might contain multiple paths separated by colons
-        size_t first_colon = install_prefix.find(':');
-        if (first_colon != std::string::npos) {
-            install_prefix = install_prefix.substr(0, first_colon);
-        }
-    }
-    
-    // Try to find the params file
-    std::string params_file;
-    if (!install_prefix.empty()) {
-        std::string candidate = install_prefix + "/share/robomas_package_2/sender_params.yaml";
-        if (std::filesystem::exists(candidate)) {
-            params_file = candidate;
-        }
-    }
-    
-    // Also check in current directory as fallback
-    if (params_file.empty()) {
-        std::string cwd_candidate = "./src/robomas_package_2/sender_params.yaml";
-        if (std::filesystem::exists(cwd_candidate)) {
-            params_file = cwd_candidate;
-        }
-    }
-    
-    // Build argv with params file if found
-    std::vector<char*> new_argv;
-    for (int i = 0; i < argc; ++i) {
-        new_argv.push_back(argv[i]);
-    }
-    
-    std::string params_arg = "--ros-args";
-    if (!params_file.empty()) {
-        new_argv.push_back(const_cast<char*>(params_arg.c_str()));
-        new_argv.push_back(const_cast<char*>("--params-file"));
-        new_argv.push_back(const_cast<char*>(params_file.c_str()));
-    }
-
-    /////////////////////////////////////// sender_params.yaml 読み込み end /////////////////////////////
-    
-    rclcpp::init(new_argv.size(), new_argv.data());
-    
-    // Create a temporary logger just for startup info
-    auto temp_node = std::make_shared<rclcpp::Node>("_temp");
-    if (!params_file.empty()) {
-        RCLCPP_INFO(temp_node->get_logger(), "Parameter file loaded: %s", params_file.c_str());
-    } else {
-        RCLCPP_WARN(temp_node->get_logger(), "No parameter file found, using default parameters");
-    }
-    temp_node.reset();
-    
+    rclcpp::init(argc, argv);
     auto node = std::make_shared<SenderNode>("can0");
     rclcpp::spin(node);
     rclcpp::shutdown();

@@ -34,8 +34,15 @@ install(TARGETS
   sender
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(FILES sender_params.yaml DESTINATION share/${PROJECT_NAME})
+install(
+  FILES sender_params.yaml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_export_dependencies(rosidl_default_runtime)
 ament_package()
