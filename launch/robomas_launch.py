@@ -13,7 +13,6 @@ def generate_launch_description():
     sender_node = Node(
         package=pkg_name,
         executable='sender',
-        name='sender',
         parameters=[sender_param_file],
         output='screen'
     )
@@ -21,7 +20,6 @@ def generate_launch_description():
     receiver_node = Node(
         package=pkg_name,
         executable='receiver',
-        name='receiver',
         output='screen'
     )
 
