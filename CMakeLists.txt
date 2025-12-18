@@ -15,7 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MotorCmd.msg"
   "msg/MotorCmdArray.msg"
   "msg/CanFrame.msg"
-  "msg/Esc.msg"
+  "msg/Ems.msg"
 )
 
 add_executable(receiver src/can_receiver_node.cpp)

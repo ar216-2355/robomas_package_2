@@ -2,7 +2,7 @@
 #include "robomas_package_2/msg/motor_cmd.hpp"
 #include "robomas_package_2/msg/motor_cmd_array.hpp"
 #include "robomas_package_2/msg/can_frame.hpp"
-#include "robomas_package_2/msg/esc.hpp"
+#include "robomas_package_2/msg/ems.hpp"
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -74,9 +74,9 @@ public:
         can_sub_ = this->create_subscription<robomas_package_2::msg::CanFrame>("can_frame_tx", 10,
             std::bind(&SenderNode::canframe_callback, this, std::placeholders::_1));
         RCLCPP_INFO(this->get_logger(), "Subscribed to can_frame_tx topic");
-        esc_sub_ = this->create_subscription<robomas_package_2::msg::Esc>("esc_tx", 10,
-            std::bind(&SenderNode::esc_callback, this, std::placeholders::_1));
-        RCLCPP_INFO(this->get_logger(), "Subscribed to esc_tx topic");
+        ems_sub_ = this->create_subscription<robomas_package_2::msg::Ems>("ems_tx", 10,
+            std::bind(&SenderNode::ems_callback, this, std::placeholders::_1));
+        RCLCPP_INFO(this->get_logger(), "Subscribed to ems_tx topic");
         RCLCPP_INFO(this->get_logger(), "CAN interface '%s' initialized successfully", ifname_.c_str());
     }
 
@@ -200,10 +200,10 @@ private:
                       msg->data[4], msg->data[5], msg->data[6], msg->data[7]);
     }
 
-    void esc_callback(const robomas_package_2::msg::Esc::SharedPtr msg) {
-        if(msg->esc == true){
+    void ems_callback(const robomas_package_2::msg::Ems::SharedPtr msg) {
+        if(msg->ems_stop == true){
             send_canframe(0x001, 0, 0,0,0,0,0,0,0,0);
-        }else if(msg->esc == false){
+        }else if(msg->ems_stop == false){
             send_canframe(0x002, 0, 0,0,0,0,0,0,0,0);
         }
     }
@@ -212,7 +212,7 @@ private:
     int sock_{-1};
     rclcpp::Subscription<robomas_package_2::msg::MotorCmdArray>::SharedPtr target_sub_;
     rclcpp::Subscription<robomas_package_2::msg::CanFrame>::SharedPtr can_sub_;
-    rclcpp::Subscription<robomas_package_2::msg::Esc>::SharedPtr esc_sub_;
+    rclcpp::Subscription<robomas_package_2::msg::Ems>::SharedPtr ems_sub_;
     MotorValue M[8];
 };
 
