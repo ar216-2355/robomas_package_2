@@ -112,14 +112,14 @@ private:
                     case 1:
                         RCLCPP_INFO(this->get_logger(), "Motor %u: Mode changed to SPEED", id);
                         name = "speed_gains_" + std::to_string(id);
-                        set_parameter_and_mode(name, c.mode, id);
+                        set_parameter_and_mode(name, 1, id);
                         break;
                     case 2:
                         RCLCPP_INFO(this->get_logger(), "Motor %u: Mode changed to POSITION", id);
                         name = "speed_gains_" + std::to_string(id);
-                        set_parameter_and_mode(name, c.mode, id);
+                        set_parameter_and_mode(name, 1, id);
                         name = "position_gains_" + std::to_string(id);
-                        set_parameter_and_mode(name, c.mode, id);
+                        set_parameter_and_mode(name, 2, id);
                         break;
                 }
             }
