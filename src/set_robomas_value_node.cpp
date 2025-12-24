@@ -205,6 +205,9 @@ private:
             send_canframe(0x001, 0, 0,0,0,0,0,0,0,0);
         }else if(msg->ems_stop == false){
             send_canframe(0x002, 0, 0,0,0,0,0,0,0,0);
+            for(int id=1; id<=8; id++){
+                M[i-1].mode = 0;
+            }
         }
     }
 
