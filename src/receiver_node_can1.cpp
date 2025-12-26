@@ -28,19 +28,19 @@ const int32_t ENC_COUNTS_PER_REV = 8192;
 int main(int argc, char * argv[])
 {
 	rclcpp::init(argc, argv);
-	auto node = std::make_shared<rclcpp::Node>("can_receiver");
-	auto pub1 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_1", 10);
-    auto pub2 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_2", 10);
-    auto pub3 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_3", 10);
-    auto pub4 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_4", 10);
-    auto pub5 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_5", 10);
-    auto pub6 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_6", 10);
-    auto pub7 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_7", 10);
-    auto pub8 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_8", 10);
+	auto node = std::make_shared<rclcpp::Node>("can_receiver_can1");
+	auto pub1 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_1_can1", 10);
+    auto pub2 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_2_can1", 10);
+    auto pub3 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_3_can1", 10);
+    auto pub4 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_4_can1", 10);
+    auto pub5 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_5_can1", 10);
+    auto pub6 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_6_can1", 10);
+    auto pub7 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_7_can1", 10);
+    auto pub8 = node->create_publisher<robomas_package_2::msg::MotorFeedback>("motor_rx_8_can1", 10);
 
-    auto pub_can_ = node->create_publisher<robomas_package_2::msg::CanFrame>("can_frame_rx", 10);
+    auto pub_can_ = node->create_publisher<robomas_package_2::msg::CanFrame>("can_frame_rx_can1", 10);
 
-    const char * ifname = (argc > 1) ? argv[1] : "can0";
+    const char * ifname = (argc > 1) ? argv[1] : "can1";
 
     int sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (sock < 0) {

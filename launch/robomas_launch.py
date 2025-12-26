@@ -8,12 +8,20 @@ def generate_launch_description():
 
     # パッケージ直下の sender_params.yaml を取得
     pkg_share = get_package_share_directory(pkg_name)
-    sender_param_file = os.path.join(pkg_share, 'sender_params.yaml')
+    sender_param_file_can0 = os.path.join(pkg_share, 'sender_params_can0.yaml')
+    sender_param_file_can1 = os.path.join(pkg_share, 'sender_params_can1.yaml')
 
-    sender_node = Node(
+    sender_node_can0 = Node(
         package=pkg_name,
-        executable='sender',
-        parameters=[sender_param_file],
+        executable='sender_can0',
+        parameters=[sender_param_file_can0],
+        output='screen'
+    )
+
+    sender_node_can1 = Node(
+        package=pkg_name,
+        executable='sender_can1',
+        parameters=[sender_param_file_can1],
         output='screen'
     )
 
@@ -24,6 +32,7 @@ def generate_launch_description():
     # )
 
     return LaunchDescription([
-        sender_node,
+        sender_node_can0,
+        sender_node_can1,
         # receiver_node,
     ])

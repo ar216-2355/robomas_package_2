@@ -21,28 +21,28 @@ struct MotorValue {
     int value{0};
 };
 
-class SenderNode : public rclcpp::Node {
+class SenderNodeCan1 : public rclcpp::Node {
 public:
-    SenderNode(const std::string& ifname = "can0") : Node("Sender_node"), ifname_(ifname) {
+    SenderNodeCan1(const std::string& ifname = "can1") : Node("Sender_node_can1"), ifname_(ifname) {
         
         // kp, kd, ki, out_max, i_sum_max
-        this->declare_parameter<std::vector<double>>("speed_gains_1", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_2", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_3", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_4", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_5", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_6", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_7", {17.0, 200.0, 0.05, 40000, 1000.0});
-        this->declare_parameter<std::vector<double>>("speed_gains_8", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_1_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_2_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_3_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_4_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_5_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_6_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_7_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
+        this->declare_parameter<std::vector<double>>("speed_gains_8_can1", {17.0, 200.0, 0.05, 40000, 1000.0});
 
-        this->declare_parameter<std::vector<double>>("position_gains_1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_2", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_3", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_4", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_5", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_6", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_7", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
-        this->declare_parameter<std::vector<double>>("position_gains_8", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_1_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_2_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_3_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_4_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_5_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_6_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_7_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
+        this->declare_parameter<std::vector<double>>("position_gains_8_can1", {3000.0, 0.0, 0.5, 2000.0, 1000.0});
 
         sock_ = socket(PF_CAN, SOCK_RAW, CAN_RAW);
         if (sock_ < 0) {
@@ -54,33 +54,33 @@ public:
         std::memset(&ifr, 0, sizeof(ifr));
         std::strncpy(ifr.ifr_name, ifname_.c_str(), IFNAMSIZ-1);
         if (ioctl(sock_, SIOCGIFINDEX, &ifr) < 0) {
-            // RCLCPP_ERROR(this->get_logger(), "ioctl SIOCGIFINDEX failed");
-            // close(sock_);
-            // throw std::runtime_error("ioctl failed");
+            RCLCPP_ERROR(this->get_logger(), "ioctl SIOCGIFINDEX failed");
+            close(sock_);
+            throw std::runtime_error("ioctl failed");
         }
         struct sockaddr_can addr;
         std::memset(&addr, 0, sizeof(addr));
         addr.can_family = AF_CAN;
         addr.can_ifindex = ifr.ifr_ifindex;
         if (bind(sock_, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-            // RCLCPP_ERROR(this->get_logger(), "Failed to bind socket to interface %s", ifname_.c_str());
-            // close(sock_);
-            // throw std::runtime_error("Bind failed");
+            RCLCPP_ERROR(this->get_logger(), "Failed to bind socket to interface %s", ifname_.c_str());
+            close(sock_);
+            throw std::runtime_error("Bind failed");
         }
 
-        target_sub_ = this->create_subscription<robomas_package_2::msg::MotorCmdArray>("motor_cmd_array", 10,
-            std::bind(&SenderNode::target_callback, this, std::placeholders::_1));
-        RCLCPP_INFO(this->get_logger(), "Subscribed to motor_cmd_array topic");
-        can_sub_ = this->create_subscription<robomas_package_2::msg::CanFrame>("can_frame_tx", 10,
-            std::bind(&SenderNode::canframe_callback, this, std::placeholders::_1));
-        RCLCPP_INFO(this->get_logger(), "Subscribed to can_frame_tx topic");
-        ems_sub_ = this->create_subscription<robomas_package_2::msg::Ems>("ems_tx", 10,
-            std::bind(&SenderNode::ems_callback, this, std::placeholders::_1));
-        RCLCPP_INFO(this->get_logger(), "Subscribed to ems_tx topic");
+        target_sub_ = this->create_subscription<robomas_package_2::msg::MotorCmdArray>("motor_cmd_array_can1", 10,
+            std::bind(&SenderNodeCan1::target_callback, this, std::placeholders::_1));
+        RCLCPP_INFO(this->get_logger(), "Subscribed to motor_cmd_array_can1 topic");
+        can_sub_ = this->create_subscription<robomas_package_2::msg::CanFrame>("can_frame_tx_can1", 10,
+            std::bind(&SenderNodeCan1::canframe_callback, this, std::placeholders::_1));
+        RCLCPP_INFO(this->get_logger(), "Subscribed to can_frame_tx_can1 topic");
+        ems_sub_ = this->create_subscription<robomas_package_2::msg::Ems>("ems_tx_can1", 10,
+            std::bind(&SenderNodeCan1::ems_callback, this, std::placeholders::_1));
+        RCLCPP_INFO(this->get_logger(), "Subscribed to ems_tx_can1 topic");
         RCLCPP_INFO(this->get_logger(), "CAN interface '%s' initialized successfully", ifname_.c_str());
     }
 
-    ~SenderNode() {
+    ~SenderNodeCan1() {
         send_canframe(0x001, 8, 0,0,0,0,0,0,0,0);
         for(uint8_t id=1; id<=8; id++){
             send_canframe(0x100 + id, 8, 0,0,0,0,0,0,0,0);
@@ -206,7 +206,7 @@ private:
         }else if(msg->ems_stop == false){
             send_canframe(0x002, 0, 0,0,0,0,0,0,0,0);
             for(int id=1; id<=8; id++){
-                M[i-1].mode = 0;
+                M[id-1].mode = 0;
             }
         }
     }
@@ -222,7 +222,7 @@ private:
 int main(int argc, char * argv[])
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<SenderNode>("can0");
+    auto node = std::make_shared<SenderNodeCan1>("can1");
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
